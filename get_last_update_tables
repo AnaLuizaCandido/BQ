@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Defina o ID do projeto
+PROJECT_ID="seu_projeto"
+
+# Arquivo de saída CSV
+OUTPUT_FILE="tabelas_atualizacao.csv"
+
+# Escreve o cabeçalho no arquivo CSV
+echo "Dataset,Tabela,Última Atualização" > "$OUTPUT_FILE"
+
+# Percorre todos os datasets do projeto
+for dataset in $(bq --project_id="$PROJECT_ID" ls --format=json | jq -r '.[].datasetReference.datasetId'); do
+  
+  # Percorre todas as tabelas do dataset
+  for table in $(bq --project_id="$PROJECT_ID" ls --dataset_id="$dataset" --format=json | jq -r '.[].tableReference.tableId'); do
+    # Obtém informações da tabela, incluindo a última modificação
+    last_modified_time=$(bq --project_id="$PROJECT_ID" show --format=json "$dataset.$table" | jq -r '.lastModifiedTime')
+
+    # Converte o timestamp de milissegundos para uma data legível
+    last_modified_date=$(date -d @$((last_modified_time / 1000)) '+%Y-%m-%d %H:%M:%S')
+    
+    # Salva as informações no arquivo CSV
+    echo "$dataset,$table,$last_modified_date" >> "$OUTPUT_FILE"
+  done
+done
+
+echo "Informações salvas em $OUTPUT_FILE"
