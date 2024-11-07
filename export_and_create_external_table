@@ -1,0 +1,19 @@
+"EXPORT DATA
+OPTIONS (
+  uri = 'gs://project/api_bkp/api/*.csv',
+  format = 'CSV',
+  overwrite = true,
+  header = true,
+  field_delimiter = ';'
+)
+AS (
+  SELECT *
+  FROM `api_bkp.api`
+);"
+CREATE or replace EXTERNAL TABLE `project.api_bkp.api`
+OPTIONS (
+  format = 'CSV',
+  uris = ['gs://project/api_bkp/api/*.csv'],
+  skip_leading_rows = 1,
+  field_delimiter = ';'
+);
